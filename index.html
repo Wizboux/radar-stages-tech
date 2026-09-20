@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}</style>
 <title>Radar Stages Tech</title>
 <style>
   :root {
@@ -226,7 +232,7 @@
 
   <div class="status-bar" id="statusBar">
     <span class="status-dot"></span>
-    <span>Vérifié <strong>3×/jour</strong></span>
+    <span>Vérifié <strong>1×/jour</strong></span>
     <span class="sep">·</span>
     <span class="muted" id="statusText">en attente du premier passage</span>
   </div>
@@ -293,7 +299,7 @@
     { id: "ex2", company: "Datadog", tier: "s", role: "Account Executive", title: "Internship – Account Executive, EMEA", location: "Dublin, Irlande", source: "Welcome to the Jungle", url: "#", foundAt: new Date(Date.now() - 86400000).toISOString(), example: true }
   ];
 
-  const state = { role: "all", tier: "all", listings: [], status: null };
+  const state = { role: "all", tier: "all", listings: [], status: null, snapshotAt: null };
 
   function timeAgo(iso) {
     const diffMs = Date.now() - new Date(iso).getTime();
@@ -310,6 +316,7 @@
     const s = state.status;
     if (!s) { el.textContent = "en attente du premier passage"; return; }
     const parts = [];
+    if (state.snapshotAt) parts.push(`instantané du ${new Date(state.snapshotAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`);
     if (s.lastRunAt) parts.push(`dernière vérification ${timeAgo(s.lastRunAt)}`);
     if (typeof s.newCount === "number") parts.push(s.newCount > 0 ? `${s.newCount} nouvelle${s.newCount > 1 ? "s" : ""} offre${s.newCount > 1 ? "s" : ""} trouvée${s.newCount > 1 ? "s" : ""}` : "aucune nouvelle offre");
     el.textContent = parts.join(" · ") || "en attente du premier passage";
@@ -389,10 +396,28 @@
 
   render();
 
+  // Hors Claude (ex. GitHub Pages) : la base n'existe pas, on lit l'instantané data.json.
+  async function loadSnapshot() {
+    try {
+      const res = await fetch("data.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      state.listings = Array.isArray(data.listings) ? data.listings : [];
+      state.status = data.status || null;
+      state.snapshotAt = data.generatedAt || null;
+      render();
+      renderStatus();
+    } catch (e) {
+      console.error("snapshot error", e);
+      document.getElementById("emptyNote").textContent =
+        "Impossible de charger data.json. Ouvre la page depuis un serveur (ex. GitHub Pages) plutôt qu'en fichier local.";
+    }
+  }
+
   async function init() {
     let db;
     try { db = await claude.use("db"); } catch (e) { db = null; }
-    if (!db) return;
+    if (!db) { await loadSnapshot(); return; }
 
     db.collection("listings").orderBy("foundAt", "desc").limit(300).onSnapshot(
       (snap) => {
@@ -412,3 +437,6 @@
   }
   init();
 </script>
+
+</body>
+</html>
