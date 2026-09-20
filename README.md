@@ -2,6 +2,10 @@
 
 Tableau de bord de veille des offres de stage / alternance (Account Management, SDR, BDR, Account Executive) chez ~100 entreprises tech ciblées — France & Europe (+ Hong Kong, Singapour, États-Unis pour les Summer Internships).
 
+## Dashboard
+
+**[Ouvrir le tableau de bord live](https://claude.ai/artifact/6qeHS3w6oxVxQPbA1N7W4u)** — version Claude, mise à jour à chaque passage de la veille. Le lien est privé : il ne s'ouvre que depuis le compte propriétaire.
+
 ## Contenu
 - `index.html` — la page du tableau de bord (HTML/CSS/JS autonome : tiers S/A/B/Bonus/FR, filtres par rôle et par tier, badges Stage/Alternance).
 - `data.json` — instantané des offres vérifiées (`generatedAt`, `status`, `listings`). La page le lit quand elle est ouverte hors de Claude.
