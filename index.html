@@ -1,0 +1,414 @@
+<title>Radar Stages Tech</title>
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-alt: #edeadf;
+    --border: #ddd7c4;
+    --text: #21201a;
+    --text-muted: #726c58;
+    --accent: #1f6f5c;
+    --accent-soft: #e2efe9;
+    --new: #b8511f;
+    --new-soft: #fbe9df;
+    --tier-s: #9c711a;
+    --tier-s-soft: #f3e7cd;
+    --tier-a: #1f6f5c;
+    --tier-a-soft: #e2efe9;
+    --tier-b: #4f5a6b;
+    --tier-b-soft: #e7eaef;
+    --tier-bonus: #7a4c82;
+    --tier-bonus-soft: #efe4f1;
+    --tier-fr: #2f6fb0;
+    --tier-fr-soft: #e3edf7;
+    --shadow: 0 1px 2px rgba(33,32,26,0.06), 0 6px 20px rgba(33,32,26,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17160f;
+      --surface: #201f17;
+      --surface-alt: #2a281d;
+      --border: #3c392a;
+      --text: #efece1;
+      --text-muted: #a8a08a;
+      --accent: #5ecbae;
+      --accent-soft: #223a33;
+      --new: #ff8a52;
+      --new-soft: #402318;
+      --tier-s: #e3b451;
+      --tier-s-soft: #3c3018;
+      --tier-a: #5ecbae;
+      --tier-a-soft: #1e3831;
+      --tier-b: #a9b4c6;
+      --tier-b-soft: #2b3038;
+      --tier-bonus: #d9a6e2;
+      --tier-bonus-soft: #362a3a;
+      --tier-fr: #7cb0e6;
+      --tier-fr-soft: #223142;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17160f;
+    --surface: #201f17;
+    --surface-alt: #2a281d;
+    --border: #3c392a;
+    --text: #efece1;
+    --text-muted: #a8a08a;
+    --accent: #5ecbae;
+    --accent-soft: #223a33;
+    --new: #ff8a52;
+    --new-soft: #402318;
+    --tier-s: #e3b451;
+    --tier-s-soft: #3c3018;
+    --tier-a: #5ecbae;
+    --tier-a-soft: #1e3831;
+    --tier-b: #a9b4c6;
+    --tier-b-soft: #2b3038;
+    --tier-bonus: #d9a6e2;
+    --tier-bonus-soft: #362a3a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  h1, h2, h3 { font-family: "Archivo", "Public Sans", sans-serif; text-wrap: balance; margin: 0; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  header.top { display: flex; flex-direction: column; gap: 6px; margin-bottom: 22px; }
+  header.top h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.01em; }
+  header.top p.sub { margin: 0; color: var(--text-muted); font-size: 14.5px; max-width: 62ch; }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 22px; box-shadow: var(--shadow);
+    font-size: 13.5px;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+  .status-bar .sep { color: var(--border); }
+  .status-bar .muted { color: var(--text-muted); }
+  .status-bar strong { font-weight: 600; }
+  .status-bar .mono { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 22px;
+  }
+  .stat-tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; box-shadow: var(--shadow);
+  }
+  .stat-tile .n {
+    font-family: "IBM Plex Mono", monospace; font-size: 22px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-tile .l { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .stat-tile[data-tier="s"] .n { color: var(--tier-s); }
+  .stat-tile[data-tier="a"] .n { color: var(--tier-a); }
+  .stat-tile[data-tier="b"] .n { color: var(--tier-b); }
+  .stat-tile[data-tier="bonus"] .n { color: var(--tier-bonus); }
+  .stat-tile[data-tier="fr"] .n { color: var(--tier-fr); }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; letter-spacing: 0.01em;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+    border-radius: 999px; padding: 5px 12px; cursor: pointer; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .controls .divider { width: 1px; background: var(--border); margin: 2px 4px; }
+
+  .feed { display: flex; flex-direction: column; gap: 10px; }
+  .section-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-muted); margin: 18px 0 2px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  .listing {
+    display: grid;
+    grid-template-columns: 4px 1fr auto;
+    gap: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .listing .stripe { background: var(--tier-a); }
+  .listing[data-tier="s"] .stripe { background: var(--tier-s); }
+  .listing[data-tier="a"] .stripe { background: var(--tier-a); }
+  .listing[data-tier="b"] .stripe { background: var(--tier-b); }
+  .listing[data-tier="bonus"] .stripe { background: var(--tier-bonus); }
+  .listing[data-tier="fr"] .stripe { background: var(--tier-fr); }
+
+  .listing .body { padding: 12px 16px; min-width: 0; }
+  .listing .row1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .listing .company { font-weight: 700; font-size: 15px; }
+  .badge {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.04em; padding: 2px 7px; border-radius: 5px; font-weight: 600;
+  }
+  .badge.tier-s { background: var(--tier-s-soft); color: var(--tier-s); }
+  .badge.tier-a { background: var(--tier-a-soft); color: var(--tier-a); }
+  .badge.tier-b { background: var(--tier-b-soft); color: var(--tier-b); }
+  .badge.tier-bonus { background: var(--tier-bonus-soft); color: var(--tier-bonus); }
+  .badge.tier-fr { background: var(--tier-fr-soft); color: var(--tier-fr); }
+  .badge.new { background: var(--new-soft); color: var(--new); }
+  .badge.role { background: var(--surface-alt); color: var(--text-muted); }
+  .badge.contract { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .badge.example { background: var(--surface-alt); color: var(--text-muted); font-style: italic; }
+
+  .listing .title { font-size: 14px; margin-top: 3px; color: var(--text); }
+  .listing .meta { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .listing .meta .mono { font-family: "IBM Plex Mono", monospace; }
+
+  .listing .action {
+    display: flex; align-items: center; padding: 0 16px;
+  }
+  .listing .action a {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600;
+    color: var(--accent); text-decoration: none; border: 1px solid var(--accent);
+    border-radius: 7px; padding: 6px 12px; white-space: nowrap;
+  }
+  .listing .action a:hover { background: var(--accent-soft); }
+  .listing.is-example { opacity: 0.72; }
+
+  .empty-note {
+    background: var(--accent-soft); border: 1px dashed var(--accent); border-radius: 10px;
+    padding: 14px 16px; font-size: 13.5px; color: var(--text); margin-bottom: 14px;
+  }
+
+  details.companies {
+    margin-top: 32px; border-top: 1px solid var(--border); padding-top: 16px;
+  }
+  details.companies summary {
+    cursor: pointer; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 14px;
+    color: var(--text-muted);
+  }
+  .company-tiers { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .company-tier-row { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .company-tier-row .tier-name { font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase; color: var(--text-muted); width: 68px; flex: none; }
+  .company-tier-row .company-list { font-size: 13px; color: var(--text); }
+
+  footer.page {
+    margin-top: 28px; font-size: 12px; color: var(--text-muted); text-align: center;
+  }
+
+  a:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .listing { grid-template-columns: 4px 1fr; }
+    .listing .action { padding: 0 16px 12px; }
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Veille recrutement</span>
+    <h1>Radar Stages Tech</h1>
+    <p class="sub">Account Management · SDR · BDR · Account Executive — stages &amp; alternances, France &amp; Europe (+ Hong Kong, Singapour, États-Unis pour les Summer Internships). Une routine automatisée vérifie les offres chez les entreprises suivies et les fait apparaître ici dès qu'elles sont publiées.</p>
+  </header>
+
+  <div class="status-bar" id="statusBar">
+    <span class="status-dot"></span>
+    <span>Vérifié <strong>3×/jour</strong></span>
+    <span class="sep">·</span>
+    <span class="muted" id="statusText">en attente du premier passage</span>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="stat-tile"><div class="n" id="statTotal">0</div><div class="l">Offres suivies</div></div>
+    <div class="stat-tile"><div class="n" id="statNew" style="color:var(--new)">0</div><div class="l">Nouvelles (24 h)</div></div>
+    <div class="stat-tile" data-tier="s"><div class="n" id="statS">0</div><div class="l">Tier S</div></div>
+    <div class="stat-tile" data-tier="a"><div class="n" id="statA">0</div><div class="l">Tier A</div></div>
+    <div class="stat-tile" data-tier="b"><div class="n" id="statB">0</div><div class="l">Tier B / Bonus</div></div>
+    <div class="stat-tile" data-tier="fr"><div class="n" id="statFR">0</div><div class="l">Tier FR</div></div>
+  </div>
+
+  <div class="controls" id="roleFilters">
+    <span class="chip active" data-role="all">Tous les rôles</span>
+    <span class="chip" data-role="Account Management">Account Management</span>
+    <span class="chip" data-role="SDR">SDR</span>
+    <span class="chip" data-role="BDR">BDR</span>
+    <span class="chip" data-role="Account Executive">Account Executive</span>
+  </div>
+  <div class="controls" id="tierFilters">
+    <span class="chip active" data-tier="all">Tous les tiers</span>
+    <span class="chip" data-tier="s">Tier S</span>
+    <span class="chip" data-tier="a">Tier A</span>
+    <span class="chip" data-tier="b">Tier B</span>
+    <span class="chip" data-tier="bonus">Bonus</span>
+    <span class="chip" data-tier="fr">Tier FR</span>
+  </div>
+
+  <div id="feedContainer">
+    <div class="empty-note" id="emptyNote">
+      Aucune offre détectée pour l'instant. Voici le format des alertes à venir — ces deux lignes sont des <strong>exemples</strong>, pas de vraies offres :
+    </div>
+    <div class="feed" id="feed"></div>
+  </div>
+
+  <details class="companies">
+    <summary>Entreprises suivies (102)</summary>
+    <div class="company-tiers" id="companyTiers"></div>
+  </details>
+
+  <footer class="page">Radar Stages Tech · mis à jour automatiquement, aucune action requise</footer>
+</div>
+
+<script>
+  const COMPANIES = {
+    s: ["Salesforce","HubSpot","Databricks","Snowflake","Datadog","Stripe","LinkedIn","Google","Google Cloud","OpenAI","Anthropic","AWS","Microsoft","Mistral AI","Nvidia","Wiz"],
+    a: ["SAP","MongoDB","Okta","Palo Alto Networks","ServiceNow","Notion","Twilio","Scale AI","Glean","Sierra","Cloudflare","Fivetran","dbt Labs","Rippling"],
+    b: ["Oracle","Adyen","Figma","Qualtrics","CrowdStrike","Confluent","UiPath","Cisco","Workday","Writer","Perplexity","SentinelOne","Fortinet","Rapid7","Tenable","PagerDuty","Docusign","Cohere"],
+    bonus: ["Meta","TikTok","Snap Inc.","Amazon Ads","Pinterest","Reddit"],
+    fr: ["360Learning","Adobe","Agicap","Airbnb","Aircall","AKUR8","Alan","Algolia","Amadeus","Amazon","Ankorstore","Back Market","Beanstock","Bolt","ChapsVision","Criteo","Dataiku","Defacto","Descartes Underwriting","Doctolib","Dust","Finary","GitGuardian","Gladia","Gorgias","Indy","Lucca","LumApps","Malt","Maki People","Mirakl","Mooncard","OVRSEA","Payfit","Pennylane","Pigment","Pivot","Qonto","Revolut","Spendesk","Strapi","Sunday","Swan","Swile","Teads","Uber","Upsun (ex-Platform.sh)","Voodoo"]
+  };
+  const TIER_LABEL = { s: "Tier S", a: "Tier A", b: "Tier B", bonus: "Bonus", fr: "Tier FR" };
+
+  document.getElementById("companyTiers").innerHTML = Object.entries(COMPANIES).map(([tier, names]) => `
+    <div class="company-tier-row">
+      <span class="tier-name">${TIER_LABEL[tier]}</span>
+      <span class="company-list">${names.join(" · ")}</span>
+    </div>
+  `).join("");
+
+  const EXAMPLE_LISTINGS = [
+    { id: "ex1", company: "Salesforce", tier: "s", role: "SDR", title: "Stage – Sales Development Representative, F/H", location: "Paris, France", source: "LinkedIn", url: "#", foundAt: new Date().toISOString(), example: true },
+    { id: "ex2", company: "Datadog", tier: "s", role: "Account Executive", title: "Internship – Account Executive, EMEA", location: "Dublin, Irlande", source: "Welcome to the Jungle", url: "#", foundAt: new Date(Date.now() - 86400000).toISOString(), example: true }
+  ];
+
+  const state = { role: "all", tier: "all", listings: [], status: null };
+
+  function timeAgo(iso) {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 60) return `il y a ${mins} min`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `il y a ${hrs} h`;
+    const days = Math.round(hrs / 24);
+    return `il y a ${days} j`;
+  }
+
+  function renderStatus() {
+    const el = document.getElementById("statusText");
+    const s = state.status;
+    if (!s) { el.textContent = "en attente du premier passage"; return; }
+    const parts = [];
+    if (s.lastRunAt) parts.push(`dernière vérification ${timeAgo(s.lastRunAt)}`);
+    if (typeof s.newCount === "number") parts.push(s.newCount > 0 ? `${s.newCount} nouvelle${s.newCount > 1 ? "s" : ""} offre${s.newCount > 1 ? "s" : ""} trouvée${s.newCount > 1 ? "s" : ""}` : "aucune nouvelle offre");
+    el.textContent = parts.join(" · ") || "en attente du premier passage";
+  }
+
+  function renderStats(list) {
+    const now = Date.now();
+    document.getElementById("statTotal").textContent = list.length;
+    document.getElementById("statNew").textContent = list.filter(l => now - new Date(l.foundAt).getTime() < 86400000).length;
+    document.getElementById("statS").textContent = list.filter(l => l.tier === "s").length;
+    document.getElementById("statA").textContent = list.filter(l => l.tier === "a").length;
+    document.getElementById("statB").textContent = list.filter(l => l.tier === "b" || l.tier === "bonus").length;
+    document.getElementById("statFR").textContent = list.filter(l => l.tier === "fr").length;
+  }
+
+  function matchesFilters(l) {
+    const roleOk = state.role === "all" || l.role === state.role;
+    const tierOk = state.tier === "all" || l.tier === state.tier;
+    return roleOk && tierOk;
+  }
+
+  function listingCard(l) {
+    const isNew = Date.now() - new Date(l.foundAt).getTime() < 86400000;
+    return `
+    <div class="listing${l.example ? " is-example" : ""}" data-tier="${l.tier}">
+      <div class="stripe"></div>
+      <div class="body">
+        <div class="row1">
+          <span class="company">${l.company}</span>
+          <span class="badge tier-${l.tier}">${TIER_LABEL[l.tier] || l.tier}</span>
+          <span class="badge role">${l.role}</span>
+          ${l.contract ? `<span class="badge contract">${l.contract === "alternance" ? "Alternance" : "Stage"}</span>` : ""}
+          ${isNew && !l.example ? '<span class="badge new">Nouveau</span>' : ""}
+          ${l.example ? '<span class="badge example">Exemple</span>' : ""}
+        </div>
+        <div class="title">${l.title}</div>
+        <div class="meta">
+          <span>${l.location}</span>
+          <span>·</span>
+          <span>${l.source}</span>
+          <span>·</span>
+          <span class="mono">${timeAgo(l.foundAt)}</span>
+        </div>
+      </div>
+      <div class="action"><a href="${l.url}" target="_blank" rel="noopener">Voir l'offre →</a></div>
+    </div>`;
+  }
+
+  function render() {
+    const usingExamples = state.listings.length === 0;
+    const source = usingExamples ? EXAMPLE_LISTINGS : state.listings;
+    document.getElementById("emptyNote").style.display = usingExamples ? "block" : "none";
+    renderStats(usingExamples ? [] : source);
+
+    const filtered = source.filter(matchesFilters).sort((a, b) => new Date(b.foundAt) - new Date(a.foundAt));
+    const feed = document.getElementById("feed");
+    if (filtered.length === 0) {
+      feed.innerHTML = `<div class="section-label">Aucun résultat pour ce filtre</div>`;
+      return;
+    }
+    feed.innerHTML = filtered.map(listingCard).join("");
+  }
+
+  function wireFilters(containerId, key) {
+    const container = document.getElementById(containerId);
+    container.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip");
+      if (!chip) return;
+      [...container.children].forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      state[key] = chip.dataset[key] || chip.dataset.role || chip.dataset.tier;
+      render();
+    });
+  }
+  wireFilters("roleFilters", "role");
+  wireFilters("tierFilters", "tier");
+
+  render();
+
+  async function init() {
+    let db;
+    try { db = await claude.use("db"); } catch (e) { db = null; }
+    if (!db) return;
+
+    db.collection("listings").orderBy("foundAt", "desc").limit(300).onSnapshot(
+      (snap) => {
+        state.listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      },
+      (err) => { console.error("listings snapshot error", err); }
+    );
+
+    db.doc("meta/status").onSnapshot(
+      (doc) => {
+        state.status = doc.exists ? doc.data() : null;
+        renderStatus();
+      },
+      (err) => { console.error("status snapshot error", err); }
+    );
+  }
+  init();
+</script>
